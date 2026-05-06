@@ -1,0 +1,35 @@
+<div class="page-content-inner">
+  <div class="page-top">
+    <div><h1>Notifications</h1><p>Budget alerts and system updates</p></div>
+    <button class="btn btn-outline" (click)="markAllRead()">Mark All Read</button>
+  </div>
+  <div class="card">
+    <div class="card-body">
+      @if (errorMessage) {
+        <div style="color:var(--danger);margin-bottom:14px">{{ errorMessage }}</div>
+      }
+      @if (loading) {
+        <div style="color:var(--text-muted)">Loading notifications...</div>
+      } @else if (notifications.length) {
+        @for (notification of notifications; track notification.notificationId) {
+          <div class="notif-item" [style.opacity]="notification.read ? .55 : 1">
+            <div class="notif-dot" [class.danger]="notifClass(notification) === 'danger'" [class.warn]="notifClass(notification) === 'warn'" [class.info]="notifClass(notification) === 'info'"></div>
+            <div style="flex:1">
+              <div class="notif-title">{{ notification.title }}</div>
+              <div class="notif-body">{{ notification.message }}</div>
+              <div class="notif-time">{{ notifTime(notification) }}</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              @if (!notification.read) {
+                <button class="btn btn-outline btn-sm" (click)="markRead(notification)">Mark Read</button>
+              }
+              <button class="btn btn-outline btn-sm" (click)="dismiss(notification)">Dismiss</button>
+            </div>
+          </div>
+        }
+      } @else {
+        <div style="color:var(--text-muted)">No notifications available.</div>
+      }
+    </div>
+  </div>
+</div>

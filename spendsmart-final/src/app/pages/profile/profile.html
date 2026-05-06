@@ -1,0 +1,40 @@
+<div class="page-content-inner">
+  <div class="page-top"><div><h1>Profile Settings</h1><p>Manage your account and preferences</p></div></div>
+  @if (message) {
+    <div class="card" style="padding:14px;color:var(--primary-dark);margin-bottom:16px">{{ message }}</div>
+  }
+  @if (errorMessage) {
+    <div class="card" style="padding:14px;color:var(--danger);margin-bottom:16px">{{ errorMessage }}</div>
+  }
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Personal Information</span></div>
+      <div class="card-body">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px"><div style="width:64px;height:64px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:var(--primary-dark)">{{ avatarText }}</div></div>
+        <div class="form-group"><label class="form-label">Full Name</label><input class="form-control" [(ngModel)]="profileForm.fullName" /></div>
+        <div class="form-group"><label class="form-label">Email</label><input class="form-control" [(ngModel)]="profileForm.email" disabled /></div>
+        <div class="form-group"><label class="form-label">Bio</label><textarea class="form-control" rows="2" [(ngModel)]="profileForm.bio"></textarea></div>
+        <div class="form-group"><label class="form-label">Timezone</label><input class="form-control" [(ngModel)]="profileForm.timezone" /></div>
+        <div class="form-actions"><button class="btn btn-primary" (click)="saveProfile()">Save Changes</button></div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header"><span class="card-title">Preferences</span></div>
+        <div class="card-body">
+          <div class="form-row"><div class="form-group"><label class="form-label">Display Currency</label><select class="form-control" [(ngModel)]="preferenceForm.currency"><option value="USD">USD ($)</option><option value="EUR">EUR (EUR)</option><option value="INR">INR (Rs)</option><option value="GBP">GBP (GBP)</option></select></div><div class="form-group"><label class="form-label">Timezone</label><input class="form-control" [(ngModel)]="preferenceForm.timezone" /></div></div>
+          <div class="form-group"><label class="form-label">Monthly Budget Goal</label><input class="form-control" [(ngModel)]="preferenceForm.monthlyBudget" type="number" /></div>
+          <div class="form-actions"><button class="btn btn-primary" (click)="savePreferences()">Save Preferences</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Security</span></div>
+        <div class="card-body">
+          <div class="form-group"><label class="form-label">Current Password</label><input class="form-control" [(ngModel)]="passwordForm.currentPassword" type="password" /></div>
+          <div class="form-row"><div class="form-group"><label class="form-label">New Password</label><input class="form-control" [(ngModel)]="passwordForm.newPassword" type="password" /></div><div class="form-group"><label class="form-label">Confirm Password</label><input class="form-control" [(ngModel)]="passwordForm.confirmPassword" type="password" /></div></div>
+          <div class="form-actions"><button class="btn btn-primary" (click)="updatePassword()">Update Password</button><button class="btn btn-danger" (click)="deactivateAccount()">Deactivate Account</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

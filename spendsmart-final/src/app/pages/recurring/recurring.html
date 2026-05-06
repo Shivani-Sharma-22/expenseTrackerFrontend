@@ -1,0 +1,52 @@
+<div class="page-content-inner">
+  <div class="page-top">
+    <div><h1>Recurring Transactions</h1><p>Manage automated recurring rules</p></div>
+    <button class="btn btn-primary" (click)="openCreate()">+ Add Recurring</button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="card" style="padding:14px;color:var(--danger)">{{ errorMessage }}</div>
+  }
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Active Expense Rules</span></div>
+      <div class="card-body">
+        @if (loading) {
+          <div style="color:var(--text-muted)">Loading recurring rules...</div>
+        } @else {
+          @for (item of expenseRules; track item.recurringId) {
+            <div class="recur-item" [style.opacity]="item.active ? 1 : 0.55">
+              <div style="display:flex;align-items:center;gap:12px"><div class="recur-icon" style="background:var(--primary-light)">{{ categoryName(item.categoryId) | slice:0:1 }}</div><div><div style="font-size:13.5px;font-weight:500">{{ item.title }}</div><div style="font-size:12px;color:var(--text-muted)">{{ item.frequency }} ? Next: {{ (item.nextDueDate || item.startDate) | date:'MMM d, y' }}</div></div></div>
+              <div style="text-align:right"><div class="amount expense" style="font-family:'Space Grotesk';font-weight:600">-{{ formatAmount(item.amount) }}</div><div style="display:flex;gap:6px;justify-content:flex-end;margin-top:4px"><button class="btn btn-outline btn-sm" (click)="toggleActive(item)">{{ item.active ? 'Pause' : 'Resume' }}</button><button class="btn btn-outline btn-sm" (click)="openEdit(item)">Edit</button><button class="btn btn-danger btn-sm" (click)="remove(item)">Delete</button></div></div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Active Income Rules</span></div>
+      <div class="card-body">
+        @for (item of incomeRules; track item.recurringId) {
+          <div class="recur-item" [style.opacity]="item.active ? 1 : 0.55">
+            <div style="display:flex;align-items:center;gap:12px"><div class="recur-icon" style="background:var(--accent-light)">{{ categoryName(item.categoryId) | slice:0:1 }}</div><div><div style="font-size:13.5px;font-weight:500">{{ item.title }}</div><div style="font-size:12px;color:var(--text-muted)">{{ item.frequency }} ? Next: {{ (item.nextDueDate || item.startDate) | date:'MMM d, y' }}</div></div></div>
+            <div style="text-align:right"><div class="amount income" style="font-family:'Space Grotesk';font-weight:600">+{{ formatAmount(item.amount) }}</div><div style="display:flex;gap:6px;justify-content:flex-end;margin-top:4px"><button class="btn btn-outline btn-sm" (click)="toggleActive(item)">{{ item.active ? 'Pause' : 'Resume' }}</button><button class="btn btn-outline btn-sm" (click)="openEdit(item)">Edit</button><button class="btn btn-danger btn-sm" (click)="remove(item)">Delete</button></div></div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" [class.open]="modal.isOpen('addRecurring')" (click)="modal.close()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header"><span class="modal-title">{{ editingRecurringId ? 'Edit Recurring Rule' : 'Add Recurring Rule' }}</span><button class="modal-close" (click)="modal.close()">x</button></div>
+    <div class="form-group"><label class="form-label">Title</label><input class="form-control" [(ngModel)]="form.title" placeholder="Enter recurring title" /></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Amount</label><input class="form-control" [(ngModel)]="form.amount" type="number" /></div><div class="form-group"><label class="form-label">Type</label><select class="form-control" [(ngModel)]="form.type">@for (type of types; track type) {<option [value]="type">{{ type }}</option>}</select></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Frequency</label><select class="form-control" [(ngModel)]="form.frequency">@for (frequency of frequencies; track frequency) {<option [value]="frequency">{{ frequency }}</option>}</select></div><div class="form-group"><label class="form-label">Category</label><select class="form-control" [(ngModel)]="form.categoryId"><option [ngValue]="null">General</option>@for (category of categories; track category.categoryId) {<option [ngValue]="category.categoryId">{{ category.name }}</option>}</select></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Start Date</label><input class="form-control" [(ngModel)]="form.startDate" type="date" /></div><div class="form-group"><label class="form-label">End Date (optional)</label><input class="form-control" [(ngModel)]="form.endDate" type="date" /></div></div>
+    <div class="form-row"><div class="form-group"><label class="form-label">Payment Method</label><select class="form-control" [(ngModel)]="form.paymentMethod">@for (method of paymentMethods; track method) {<option [value]="method">{{ method }}</option>}</select></div><div class="form-group"><label class="form-label">Active</label><select class="form-control" [(ngModel)]="form.isActive"><option [ngValue]="true">Active</option><option [ngValue]="false">Paused</option></select></div></div>
+    <div class="form-group"><label class="form-label">Description</label><textarea class="form-control" rows="2" [(ngModel)]="form.description"></textarea></div>
+    <div class="form-actions"><button class="btn btn-outline" (click)="modal.close()">Cancel</button><button class="btn btn-primary" (click)="saveRecurring()" [disabled]="saving">{{ saving ? 'Saving...' : (editingRecurringId ? 'Update Rule' : 'Create Rule') }}</button></div>
+  </div>
+</div>

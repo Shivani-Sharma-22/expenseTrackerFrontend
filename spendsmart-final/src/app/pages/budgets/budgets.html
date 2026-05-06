@@ -1,0 +1,112 @@
+<div class="page-content-inner">
+  <div class="page-top">
+    <div><h1>Budgets</h1><p>Set and track spending limits per category</p></div>
+    <button class="btn btn-primary" (click)="openCreate()">+ Create Budget</button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="card" style="padding:14px;color:var(--danger);background:#fee2e2;border-radius:10px;margin-bottom:16px">
+      {{ errorMessage }}
+      <button style="float:right;background:none;border:none;color:var(--danger);cursor:pointer;font-size:16px" (click)="errorMessage = ''">×</button>
+    </div>
+  }
+
+  <div class="stats-grid" style="margin-bottom:20px">
+    <div class="stat-card"><div class="stat-label">Total Budget</div><div class="stat-value">{{ formatAmount(totalBudget) }}</div></div>
+    <div class="stat-card"><div class="stat-label">Total Spent</div><div class="stat-value red">{{ formatAmount(totalSpent) }}</div></div>
+    <div class="stat-card"><div class="stat-label">Remaining</div><div class="stat-value green">{{ formatAmount(remaining) }}</div></div>
+    <div class="stat-card"><div class="stat-label">Budgets Exceeded</div><div class="stat-value red">{{ exceededCount }}</div></div>
+  </div>
+
+  @if (alerts.length) {
+    <div class="card" style="padding:14px;margin-bottom:16px">
+      <div class="card-title" style="margin-bottom:10px">Budget Alerts</div>
+      @for (alert of alerts; track alert) {
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:8px">{{ alert }}</div>
+      }
+    </div>
+  }
+
+  <div class="card">
+    <div class="card-header"><span class="card-title">All Budgets</span></div>
+    <div class="card-body">
+      @if (loading) {
+        <div style="color:var(--text-muted);text-align:center;padding:30px">Loading budgets...</div>
+      } @else if (budgets.length === 0) {
+        <div style="color:var(--text-muted);text-align:center;padding:30px">No budgets created yet. Click "Create Budget" to get started.</div>
+      } @else {
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          @for (budget of budgets; track budget.budgetId) {
+            <div>
+              <div class="budget-item">
+                <div class="budget-row">
+                  <span class="budget-name">{{ categoryName(budget.categoryId) }}</span>
+                  <span style="font-size:12px;color:var(--primary-dark);font-weight:500">{{ (progress(budget)?.percentageUsed || 0) | number:'1.0-0' }}%</span>
+                  <span class="budget-amounts">{{ formatAmount(progress(budget)?.spentAmount || 0) }} / {{ formatAmount(budget.limitAmount) }}</span>
+                </div>
+                <div class="progress-bar-bg"><div class="progress-bar" [class.warn]="(progress(budget)?.percentageUsed || 0) >= budget.alertThreshold && (progress(budget)?.percentageUsed || 0) < 100" [class.danger]="(progress(budget)?.percentageUsed || 0) >= 100" [class.ok]="(progress(budget)?.percentageUsed || 0) < budget.alertThreshold" [style.width.%]="clampPercentage(progress(budget)?.percentageUsed)"></div></div>
+                <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-outline btn-sm" (click)="openEdit(budget)">Edit</button><button class="btn btn-danger btn-sm" (click)="deleteBudget(budget)">Delete</button></div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" [class.open]="modal.isOpen('addBudget')" (click)="modal.close()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header"><span class="modal-title">{{ editingBudgetId ? 'Edit Budget' : 'Create Budget' }}</span><button class="modal-close" (click)="modal.close()">×</button></div>
+    <div style="padding:20px">
+      @if (errorMessage) {
+        <div style="background:#fee2e2;color:#991b1b;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px">{{ errorMessage }}</div>
+      }
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-control" [(ngModel)]="form.categoryId" name="categoryId">
+            <option [ngValue]="null">Select category</option>
+            @for (category of categories; track category.categoryId) {
+              <option [ngValue]="category.categoryId">{{ category.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Period</label>
+          <select class="form-control" [(ngModel)]="form.period" name="period">
+            <option value="MONTHLY">Monthly</option>
+            <option value="WEEKLY">Weekly</option>
+            <option value="CUSTOM">Custom</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Limit Amount</label>
+          <input class="form-control" [(ngModel)]="form.limitAmount" type="number" placeholder="500" name="limitAmount" min="0" step="0.01" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Alert at (%)</label>
+          <input class="form-control" [(ngModel)]="form.alertThreshold" type="number" placeholder="80" name="alertThreshold" min="0" max="100" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Start Date</label>
+          <input class="form-control" [(ngModel)]="form.startDate" type="date" name="startDate" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">End Date</label>
+          <input class="form-control" [(ngModel)]="form.endDate" type="date" name="endDate" />
+        </div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" (click)="modal.close()">Cancel</button>
+      <button class="btn btn-primary" (click)="saveBudget()" [disabled]="saving || !form.limitAmount || !form.categoryId">
+        {{ saving ? 'Saving...' : (editingBudgetId ? 'Update Budget' : 'Create Budget') }}
+      </button>
+    </div>
+  </div>
+</div>

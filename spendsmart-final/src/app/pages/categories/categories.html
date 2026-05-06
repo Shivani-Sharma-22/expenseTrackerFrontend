@@ -1,0 +1,73 @@
+<div class="page-content-inner">
+  <div class="page-top">
+    <div><h1>Categories</h1><p>Organize your transactions with custom categories</p></div>
+    <button class="btn btn-primary" (click)="openCreate()">+ Add Category</button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="card" style="padding:14px;color:var(--danger)">{{ errorMessage }}</div>
+  }
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Expense Categories</span></div>
+      <div class="card-body" style="padding:0">
+        @if (loading) {
+          <div style="padding:20px;color:var(--text-muted)">Loading categories...</div>
+        } @else {
+          <table class="data-table">
+            <thead><tr><th>Category</th><th>Transactions</th><th>Budget Limit</th><th>This Month</th><th></th></tr></thead>
+            <tbody>
+              @for (category of expenseCategories; track category.categoryId) {
+                <tr>
+                  <td><span style="display:flex;align-items:center;gap:8px"><span class="cat-dot" [style.background]="category.colorCode || '#1D9E75'"></span>{{ category.icon || '?' }} {{ category.name }}</span></td>
+                  <td style="color:var(--text-muted)">{{ transactionCount(category) }}</td>
+                  <td style="font-family:'Space Grotesk';font-size:13px">{{ formatAmount(category.budgetLimit || 0) }}</td>
+                  <td class="amount expense">{{ formatAmount(currentMonthTotal(category)) }}</td>
+                  <td><button class="btn btn-outline btn-sm" (click)="openEdit(category)">Edit</button> <button class="btn btn-danger btn-sm" (click)="removeCategory(category)">Delete</button></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Income Categories</span></div>
+      <div class="card-body" style="padding:0">
+        <table class="data-table">
+          <thead><tr><th>Category</th><th>Transactions</th><th>This Month</th><th></th></tr></thead>
+          <tbody>
+            @for (category of incomeCategories; track category.categoryId) {
+              <tr>
+                <td><span style="display:flex;align-items:center;gap:8px"><span class="cat-dot" [style.background]="category.colorCode || '#1D9E75'"></span>{{ category.icon || '?' }} {{ category.name }}</span></td>
+                <td style="color:var(--text-muted)">{{ transactionCount(category) }}</td>
+                <td class="amount income">{{ formatAmount(currentMonthTotal(category)) }}</td>
+                <td><button class="btn btn-outline btn-sm" (click)="openEdit(category)">Edit</button> <button class="btn btn-danger btn-sm" (click)="removeCategory(category)">Delete</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" [class.open]="modal.isOpen('addCategory')" (click)="modal.close()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header"><span class="modal-title">{{ editingCategoryId ? 'Edit Category' : 'Add Category' }}</span><button class="modal-close" (click)="modal.close()">x</button></div>
+    <div class="form-group"><label class="form-label">Category Name</label><input class="form-control" [(ngModel)]="form.name" placeholder="e.g. Dining Out" /></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Type</label><select class="form-control" [(ngModel)]="form.type"><option value="EXPENSE">Expense</option><option value="INCOME">Income</option></select></div>
+      <div class="form-group"><label class="form-label">Icon</label><input class="form-control" [(ngModel)]="form.icon" placeholder="e.g. Food" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Color</label><input class="form-control" [(ngModel)]="form.colorCode" type="color" /></div>
+      <div class="form-group"><label class="form-label">Monthly Budget Limit</label><input class="form-control" [(ngModel)]="form.budgetLimit" type="number" placeholder="0" /></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" (click)="modal.close()">Cancel</button>
+      <button class="btn btn-primary" (click)="saveCategory()" [disabled]="saving">{{ saving ? 'Saving...' : (editingCategoryId ? 'Update Category' : 'Create Category') }}</button>
+    </div>
+  </div>
+</div>

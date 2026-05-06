@@ -1,0 +1,51 @@
+<div class="page-content-inner">
+  <div class="page-top"><div><h1>Admin Panel</h1><p>Platform-wide oversight and management</p></div></div>
+  @if (message) {
+    <div class="card" style="padding:14px;color:var(--primary-dark);margin-bottom:16px">{{ message }}</div>
+  }
+  @if (errorMessage) {
+    <div class="card" style="padding:14px;color:var(--danger);margin-bottom:16px">{{ errorMessage }}</div>
+  }
+  <div class="stats-grid" style="margin-bottom:20px">
+    <div class="stat-card"><div class="admin-metric"><div class="big-num">{{ totalUsers }}</div><div class="metric-lbl">Total Users</div></div></div>
+    <div class="stat-card"><div class="admin-metric"><div class="big-num">{{ totalTransactions }}</div><div class="metric-lbl">Total Notifications</div></div></div>
+    <div class="stat-card"><div class="admin-metric"><div class="big-num">{{ formatAmount(averageSpend) }}</div><div class="metric-lbl">Avg Monthly Spend/User</div></div></div>
+    <div class="stat-card"><div class="admin-metric"><div class="big-num">{{ alertsToday }}</div><div class="metric-lbl">Notifications Today</div></div></div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><span class="card-title">User Management</span></div>
+      <div style="padding:0">
+        <table class="data-table">
+          <thead><tr><th>User</th><th>Status</th><th>Monthly Spend</th><th>Actions</th></tr></thead>
+          <tbody>
+            @for (user of users; track user.userId) {
+              <tr><td>{{ user.email }}</td><td><span class="pill salary">{{ user.isActive === false ? 'Inactive' : 'Active' }}</span></td><td style="font-family:'Space Grotesk';font-size:13px">{{ formatAmount(monthlySpend(user)) }}</td><td><button class="btn btn-danger btn-sm" (click)="deactivate(user)" [disabled]="user.isActive === false">Deactivate</button></td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Platform Notifications</span></div>
+      <div class="card-body">
+        <div class="form-group"><label class="form-label">Notification Title</label><input class="form-control" [(ngModel)]="broadcastForm.title" placeholder="e.g. New feature released" /></div>
+        <div class="form-group"><label class="form-label">Message</label><textarea class="form-control" rows="3" [(ngModel)]="broadcastForm.message" placeholder="Broadcast message to users..."></textarea></div>
+        <button class="btn btn-primary" (click)="sendBroadcast()" [disabled]="sending">{{ sending ? 'Sending...' : 'Send Broadcast' }}</button>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="card-header"><span class="card-title">Audit Log</span></div>
+    <div style="padding:0">
+      <table class="data-table">
+        <thead><tr><th>Timestamp</th><th>Type</th><th>Title</th><th>Message</th></tr></thead>
+        <tbody>
+          @for (notification of notifications.slice(0, 10); track notification.notificationId) {
+            <tr><td style="font-size:12px;color:var(--text-muted)">{{ notification.createdAt | date:'MMM d, y, h:mm a' }}</td><td>{{ notification.type }}</td><td>{{ notification.title }}</td><td style="font-size:12.5px">{{ notification.message }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

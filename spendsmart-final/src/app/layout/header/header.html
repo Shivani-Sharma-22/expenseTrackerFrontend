@@ -1,0 +1,37 @@
+<header class="header">
+  <div>
+    <div class="header-title">{{ pageTitle }}</div>
+    <div style="font-size:12px;color:var(--text-muted);margin-top:4px">{{ displayName() }} ? {{ monthLabel }}</div>
+  </div>
+  <div class="header-actions">
+    <button class="header-btn" (click)="openNotif()">Notifications <span class="badge">{{ unreadCount }}</span></button>
+    <button class="header-btn primary" (click)="addExpense()">Add Expense</button>
+    <button class="header-btn" (click)="logout()">Logout</button>
+  </div>
+</header>
+
+<div class="modal-overlay" [class.open]="showNotifModal" (click)="closeNotif()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <span class="modal-title">Recent Notifications</span>
+      <button class="modal-close" (click)="closeNotif()">x</button>
+    </div>
+    @if (notifications.length) {
+      @for (notification of notifications; track notification.notificationId) {
+        <div class="notif-item" [style.opacity]="notification.read ? 0.65 : 1">
+          <div class="notif-dot" [class.danger]="notifClass(notification) === 'danger'" [class.warn]="notifClass(notification) === 'warn'" [class.info]="notifClass(notification) === 'info'"></div>
+          <div style="flex:1">
+            <div class="notif-title">{{ notification.title }}</div>
+            <div class="notif-body">{{ notification.message }}</div>
+            <div class="notif-time">{{ notifTime(notification) }}</div>
+          </div>
+          @if (!notification.read) {
+            <button class="btn btn-outline btn-sm" (click)="markRead(notification)">Mark Read</button>
+          }
+        </div>
+      }
+    } @else {
+      <div style="padding:16px;color:var(--text-muted)">No notifications found.</div>
+    }
+  </div>
+</div>

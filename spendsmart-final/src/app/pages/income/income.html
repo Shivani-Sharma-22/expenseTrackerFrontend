@@ -1,0 +1,78 @@
+<div class="page-content-inner">
+  <div class="page-top">
+    <div><h1>Income</h1><p>Track all your income sources</p></div>
+    <button class="btn btn-primary" (click)="openCreate()">+ Add Income</button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="card" style="padding:14px;color:var(--danger)">{{ errorMessage }}</div>
+  }
+
+  <div class="card">
+    <div class="card-header">
+      <div class="filters" style="margin:0;flex:1">
+        <input class="search-input" type="text" placeholder="Search income..." [(ngModel)]="searchTerm" />
+        <select class="filter-select" [(ngModel)]="sourceFilter">
+          <option value="ALL">All Sources</option>
+          @for (source of sourceOptions; track source) {
+            <option [value]="source">{{ source }}</option>
+          }
+        </select>
+        <select class="filter-select" [(ngModel)]="timeFilter">
+          <option value="THIS_MONTH">This Month</option>
+          <option value="LAST_MONTH">Last Month</option>
+          <option value="ALL">All Time</option>
+        </select>
+      </div>
+    </div>
+    <div>
+      @if (loading) {
+        <div style="padding:20px;color:var(--text-muted)">Loading income records...</div>
+      } @else {
+        <table class="data-table">
+          <thead><tr><th>Date</th><th>Title</th><th>Source</th><th>Category</th><th>Recurring</th><th style="text-align:right">Amount</th><th>Actions</th></tr></thead>
+          <tbody>
+            @for (income of filteredIncomes; track income.incomeId) {
+              <tr>
+                <td style="color:var(--text-muted);font-size:12px">{{ income.date | date:'MMM d, y' }}</td>
+                <td>{{ income.title }}</td>
+                <td><span class="pill salary">{{ income.source }}</span></td>
+                <td><span class="pill other">{{ categoryName(income.categoryId) }}</span></td>
+                <td style="font-size:12px;color:var(--primary-dark)">{{ income.recurring ? income.recurrencePeriod || 'Recurring' : 'One-time' }}</td>
+                <td class="amount income" style="text-align:right">+{{ formatAmount(income.amount) }}</td>
+                <td><button class="btn btn-outline btn-sm" (click)="openEdit(income)">Edit</button> <button class="btn btn-danger btn-sm" (click)="deleteIncome(income)">Delete</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+    <div style="padding:16px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:13px;color:var(--text-muted)">
+      <span>Total Income: <strong style="color:var(--primary-dark)">+{{ formatAmount(totalAmount) }}</strong></span>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" [class.open]="modal.isOpen('addIncome')" (click)="modal.close()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header"><span class="modal-title">{{ editingIncomeId ? 'Edit Income' : 'Add Income' }}</span><button class="modal-close" (click)="modal.close()">x</button></div>
+    <div class="form-group"><label class="form-label">Title</label><input class="form-control" [(ngModel)]="form.title" placeholder="Enter income title" /></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Amount</label><input class="form-control" [(ngModel)]="form.amount" type="number" placeholder="0.00" /></div>
+      <div class="form-group"><label class="form-label">Date</label><input class="form-control" [(ngModel)]="form.date" type="date" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Source</label><select class="form-control" [(ngModel)]="form.source">@for (source of sourceOptions; track source) {<option [value]="source">{{ source }}</option>}</select></div>
+      <div class="form-group"><label class="form-label">Category</label><select class="form-control" [(ngModel)]="form.categoryId"><option [ngValue]="null">General</option>@for (category of categories; track category.categoryId) {<option [ngValue]="category.categoryId">{{ category.name }}</option>}</select></div>
+    </div>
+    <div class="form-group"><label class="form-label">Notes</label><textarea class="form-control" rows="2" [(ngModel)]="form.notes"></textarea></div>
+    <div class="form-group" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="incomeRecurring" [(ngModel)]="form.isRecurring" /><label for="incomeRecurring" style="font-size:13.5px;cursor:pointer">Recurring income</label></div>
+    @if (form.isRecurring) {
+      <div class="form-group"><label class="form-label">Recurrence</label><select class="form-control" [(ngModel)]="form.recurrencePeriod">@for (option of recurrenceOptions; track option) {<option [value]="option">{{ option }}</option>}</select></div>
+    }
+    <div class="form-actions">
+      <button class="btn btn-outline" (click)="modal.close()">Cancel</button>
+      <button class="btn btn-primary" (click)="saveIncome()" [disabled]="saving">{{ saving ? 'Saving...' : (editingIncomeId ? 'Update Income' : 'Add Income') }}</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,21 @@
+<div class="page-content-inner">
+  @if (errorMessage) {
+    <div class="card" style="padding:14px;color:var(--danger);margin-bottom:16px">{{ errorMessage }}</div>
+  }
+  <div class="stats-grid" style="margin-bottom:20px">
+    <div class="stat-card income"><div class="stat-label">Annual Income</div><div class="stat-value green">{{ formatAmount(annualIncome) }}</div><div class="stat-delta">Last 12 months</div></div>
+    <div class="stat-card expense"><div class="stat-label">Annual Expenses</div><div class="stat-value red">{{ formatAmount(annualExpense) }}</div><div class="stat-delta">Last 12 months</div></div>
+    <div class="stat-card savings"><div class="stat-label">Annual Savings</div><div class="stat-value">{{ formatAmount(annualSavings) }}</div><div class="stat-delta">Net savings</div></div>
+    <div class="stat-card health"><div class="stat-label">Avg Health Score</div><div class="stat-value" style="color:var(--purple)">{{ averageHealth | number:'1.0-0' }}/100</div><div class="stat-delta">Savings-led score</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card"><div class="card-header"><span class="card-title">Savings Rate Trend - 12 Months</span></div><div class="card-body"><div style="height:220px;position:relative"><canvas id="savingsTrendChart"></canvas></div></div></div>
+    <div class="card"><div class="card-header"><span class="card-title">Daily Expense Trend</span></div><div class="card-body"><div style="height:220px;position:relative"><canvas id="dailyTrendChart"></canvas></div></div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card"><div class="card-header"><span class="card-title">Cash Flow Summary</span></div><div class="card-body"><div style="height:220px;position:relative"><canvas id="cashflowChart"></canvas></div></div></div>
+    <div class="card"><div class="card-header"><span class="card-title">Top Spending Categories</span></div><div class="card-body"><div style="display:flex;flex-direction:column;gap:12px">@for (item of topCategories; track item.label) {<div style="display:flex;align-items:center;gap:10px"><div style="flex:1"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>{{ item.label }}</span><span style="font-weight:600">{{ formatAmount(item.amount) }}</span></div><div class="progress-bar-bg"><div class="progress-bar ok" [style.width.%]="item.percentage"></div></div></div></div>}</div></div></div>
+  </div>
+</div>

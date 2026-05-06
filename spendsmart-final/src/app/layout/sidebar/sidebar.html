@@ -1,0 +1,55 @@
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-name">SpendSmart</div>
+    <div class="logo-tag">Track ? Visualize ? Save</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Overview</div>
+    <a class="nav-item" routerLink="/app/dashboard" routerLinkActive="active">
+      <span class="nav-icon">Dashboard</span>
+    </a>
+    <a class="nav-item" routerLink="/app/analytics" routerLinkActive="active">
+      <span class="nav-icon">Analytics</span>
+    </a>
+
+    <div class="nav-section-label">Transactions</div>
+    <a class="nav-item" routerLink="/app/expenses" routerLinkActive="active">
+      <span class="nav-icon">Expenses</span>
+    </a>
+    <a class="nav-item" routerLink="/app/income" routerLinkActive="active">
+      <span class="nav-icon">Income</span>
+    </a>
+    <a class="nav-item" routerLink="/app/recurring" routerLinkActive="active">
+      <span class="nav-icon">Recurring</span>
+    </a>
+
+    <div class="nav-section-label">Management</div>
+    <a class="nav-item" routerLink="/app/categories" routerLinkActive="active">
+      <span class="nav-icon">Categories</span>
+    </a>
+    <a class="nav-item" routerLink="/app/budgets" routerLinkActive="active">
+      <span class="nav-icon">Budgets</span>
+    </a>
+    <a class="nav-item" routerLink="/app/reports" routerLinkActive="active">
+      <span class="nav-icon">Reports</span>
+    </a>
+
+    <div class="nav-section-label">Account</div>
+    <a class="nav-item" routerLink="/app/notifications" routerLinkActive="active">
+      <span class="nav-icon">Notifications</span>
+      <span class="badge" style="margin-left:auto">{{ unreadCount }}</span>
+    </a>
+    <a class="nav-item" routerLink="/app/profile" routerLinkActive="active">
+      <span class="nav-icon">Profile</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-user">
+    <div class="user-avatar">{{ userInitials() }}</div>
+    <div class="user-info">
+      <div class="user-name">{{ userName() }}</div>
+      <div class="user-role">{{ userMeta() }}</div>
+    </div>
+  </div>
+</aside>

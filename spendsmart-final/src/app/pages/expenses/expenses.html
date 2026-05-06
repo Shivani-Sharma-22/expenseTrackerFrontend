@@ -1,0 +1,82 @@
+<div class="page-content-inner">
+  <div class="page-top">
+    <div><h1>Expenses</h1><p>Manage and track all your spending</p></div>
+    <button class="btn btn-primary" (click)="openCreate()">+ Add Expense</button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="card" style="padding:14px;color:var(--danger)">{{ errorMessage }}</div>
+  }
+
+  <div class="card">
+    <div class="card-header" style="flex-wrap:wrap;gap:10px">
+      <div class="filters" style="margin:0;flex:1">
+        <input class="search-input" type="text" placeholder="Search expenses..." [(ngModel)]="searchTerm" />
+        <select class="filter-select" [(ngModel)]="categoryFilter">
+          <option value="ALL">All Categories</option>
+          @for (category of categories; track category.categoryId) {
+            <option [value]="category.categoryId">{{ category.name }}</option>
+          }
+        </select>
+        <select class="filter-select" [(ngModel)]="methodFilter">
+          <option value="ALL">All Methods</option>
+          @for (method of paymentMethods; track method) {
+            <option [value]="method">{{ method }}</option>
+          }
+        </select>
+        <select class="filter-select" [(ngModel)]="timeFilter">
+          <option value="THIS_MONTH">This Month</option>
+          <option value="LAST_MONTH">Last Month</option>
+          <option value="ALL">All Time</option>
+        </select>
+      </div>
+    </div>
+    <div style="padding:0">
+      @if (loading) {
+        <div style="padding:20px;color:var(--text-muted)">Loading expenses...</div>
+      } @else {
+        <table class="data-table">
+          <thead><tr><th>Date</th><th>Title</th><th>Category</th><th>Payment</th><th>Notes</th><th style="text-align:right">Amount</th><th>Actions</th></tr></thead>
+          <tbody>
+            @for (expense of filteredExpenses; track expense.expenseId) {
+              <tr>
+                <td style="color:var(--text-muted);font-size:12px">{{ expense.date | date:'MMM d, y' }}</td>
+                <td>{{ expense.title }}</td>
+                <td><span class="pill food">{{ categoryName(expense.categoryId) }}</span></td>
+                <td style="color:var(--text-muted);font-size:12px">{{ expense.paymentMethod || 'N/A' }}</td>
+                <td style="color:var(--text-muted);font-size:12px">{{ expense.notes || '-' }}</td>
+                <td class="amount expense" style="text-align:right">-{{ formatAmount(expense.amount) }}</td>
+                <td><button class="btn btn-outline btn-sm" (click)="openEdit(expense)">Edit</button> <button class="btn btn-danger btn-sm" (click)="deleteExpense(expense)">Delete</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+    <div style="padding:16px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--text-muted)">
+      <span>Showing {{ filteredExpenses.length }} expense(s) ? Total: <strong style="color:var(--danger)">-{{ formatAmount(totalAmount) }}</strong></span>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" [class.open]="modal.isOpen('addExpense')" (click)="modal.close()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header"><span class="modal-title">{{ editingExpenseId ? 'Edit Expense' : 'Add Expense' }}</span><button class="modal-close" (click)="modal.close()">x</button></div>
+    <div class="form-group"><label class="form-label">Title</label><input class="form-control" [(ngModel)]="form.title" placeholder="Enter expense title" /></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Amount</label><input class="form-control" [(ngModel)]="form.amount" type="number" placeholder="0.00" /></div>
+      <div class="form-group"><label class="form-label">Date</label><input class="form-control" [(ngModel)]="form.date" type="date" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Category</label><select class="form-control" [(ngModel)]="form.categoryId"><option [ngValue]="null">Select category</option>@for (category of categories; track category.categoryId) {<option [ngValue]="category.categoryId">{{ category.name }}</option>}</select></div>
+      <div class="form-group"><label class="form-label">Payment Method</label><select class="form-control" [(ngModel)]="form.paymentMethod">@for (method of paymentMethods; track method) {<option [value]="method">{{ method }}</option>}</select></div>
+    </div>
+    <div class="form-group"><label class="form-label">Notes</label><textarea class="form-control" rows="2" [(ngModel)]="form.notes" placeholder="Optional notes..."></textarea></div>
+    <div class="form-group"><label class="form-label">Receipt URL</label><input class="form-control" [(ngModel)]="form.receiptUrl" placeholder="https://..." /></div>
+    <div class="form-group" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="isRecurring2" [(ngModel)]="form.isRecurring" /><label for="isRecurring2" style="font-size:13.5px;cursor:pointer">Mark as recurring transaction</label></div>
+    <div class="form-actions">
+      <button class="btn btn-outline" (click)="modal.close()">Cancel</button>
+      <button class="btn btn-primary" (click)="saveExpense()" [disabled]="saving || !form.categoryId">{{ saving ? 'Saving...' : (editingExpenseId ? 'Update Expense' : 'Add Expense') }}</button>
+    </div>
+  </div>
+</div>
