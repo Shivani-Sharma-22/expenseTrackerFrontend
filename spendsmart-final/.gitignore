@@ -42,3 +42,6 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+# Google OAuth and Secrets
+spendsmart-final/GOOGLE_OAUTH_SETUP.md
+.env
