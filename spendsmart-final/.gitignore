@@ -42,6 +42,14 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
-# Google OAuth and Secrets
-spendsmart-final/GOOGLE_OAUTH_SETUP.md
+# Environment and secrets
 .env
+.env.*
+!.env.example
+*.local
+*.secret
+*.secrets
+*credentials*
+*credential*
+*client-secret*
+*client_secret*
